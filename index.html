@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#543326"><title>撒一点！· 掌上小摊</title><link rel="stylesheet" href="phone.css?v=daylight1"><script defer src="sprites.js"></script><script defer src="shop-art.js?v=taste1"></script><script defer src="menu.js"></script><script defer src="game.js?v=jarlabel2"></script><script defer src="motion.js"></script></head>
+<body data-mode="mobile"><main class="app" id="phone">
+<header class="top">
+  <div class="wordmark"><canvas width="48" height="38" data-art="logo" aria-hidden="true"></canvas><b>撒一点！</b></div>
+  <nav><button id="motion" aria-pressed="false">开启体感</button><button id="album" hidden>票夹</button><button id="help">玩法</button></nav>
+</header>
+<section id="stage">
+<div class="kitchenScenery" aria-hidden="true"></div>
+<section class="orderCard" aria-label="当前订单">
+  <canvas id="orderPortrait" aria-hidden="true" width="144" height="156"></canvas>
+  <div><small><span id="orderLabel"></span> <span id="round"></span></small><h1 id="order"></h1></div><canvas id="orderDish" width="162" height="138" aria-label="本单撒料预览"></canvas>
+</section>
+<div id="modebar"><span id="modeName">点按模式</span><small id="motionStatus" role="status">点瓶身撒料</small></div>
+<section id="bottleview">
+  <div class="displayJar">
+    <button class="bottleTouch" id="tapJar" aria-label="轻点瓶身撒一撮"><canvas id="bottle" width="768" height="846"></canvas></button>
+    <div class="jarPlaque"><h2 id="bottlename">葱花</h2></div>
+  </div>
+  <div class="countLayer"><b id="boardword"></b><span id="countCaption">即将出菜</span></div>
+  <div class="rack"><div id="choices" aria-label="选择调料"></div></div>
+</section>
+<div id="dining" hidden><canvas id="dinepic" width="800" height="400" aria-label="店内客人正在用餐"></canvas><b id="speech" role="status"></b></div>
+<div class="actions"><button id="primary">撒一撮</button><button id="secondary">扶正出菜</button></div>
+<p id="hint" class="sr" aria-live="polite"></p>
+<section id="wallet" hidden aria-label="手机小票夹">
+<div class="walletbar"><b>我的票夹</b><span id="pageNo"></span></div>
+<article class="paper" aria-label="今日收摊小票">
+<header><span id="ticketDate"></span><span id="ticketNo"></span></header>
+<h2>今日收摊</h2><div id="stars"></div>
+<div class="total"><span>本摊总分</span><b id="total"></b><small>/ 30</small></div>
+<div class="seam"></div><div class="stampLabel">常客满分章</div><div id="stamps"></div>
+<div id="record"></div>
+</article>
+<div class="walletControls"><button id="older" aria-label="上一张小票">‹</button><button id="walletAction">再开一摊</button><button id="newer" aria-label="下一张小票">›</button></div></section>
+<span id="menuCode" hidden></span><span id="pips" hidden></span><span id="phonetag" hidden></span></section>
+<dialog id="guide"><h2>怎么开摊</h2><p>看客人的订单，在调料架选一瓶。点瓶身或「撒一撮」，每次撒下一份。</p><p>使用体感时，把手机顶端朝下轻抖，撒好后扶正。出菜倒数时，把手机转横、屏幕朝上放稳就能接菜。</p><p>点按模式可用「扶正出菜」和「横放手机」完成同样的动作。客人举牌后，点按钮进入下一单。开启体感时，也可以把手机顶端朝上竖起。第三单后查看收摊小票。</p><div><button id="sound" aria-pressed="false">音效 关</button><button id="closeguide">知道了</button></div></dialog>
+
+</main></body></html>
