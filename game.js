@@ -96,6 +96,7 @@ function refresh(){const o=getOrder();drawCustomerIcon(o.id);$('album').hidden=p
   if(mobile&&(phase==='count'||phase==='slide'))$('hint').textContent=land?'筷子备好了，等菜上桌。':'趁出菜前横放手机，也可以点按接菜。';
   if(phase==='miss'){setButtons('横放查看','');$('primary').disabled=false;$('hint').textContent='碗已经滑走了。放平手机，看看客人的餐桌。'}
   if(phase==='eat'||phase==='react'){setButtons('正在尝菜','');$('primary').disabled=true;$('hint').textContent=phase==='eat'?'客人接住了，尝尝这一单。':'看看客人的表情。'}
+  window.dispatchEvent(new Event('stall-state'));
   if(phase==='result'){const retry=!caught&&index===0&&!retried;setButtons(retry?'再接一次':index===2?'看收摊小票':'竖起手机 · 下一单','');$('hint').textContent=retry?'横着放平手机接菜。这一碗可以免费重送。':caught?`口味 ${tasteScore} / 10 分 · ${review}`:review}
 }
 function cook(){document.body.classList.remove('view-wallet');$('wallet').hidden=true;phase='cook';handfuls=[];grains=[];retried=false;caught=false;tasteScore=null;review='';ShopArt.prepareGuest(getOrder().id);setLand(false);$('speech').textContent='';choose(0);refresh()}

@@ -1,0 +1,6 @@
+<!doctype html>
+<html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>撒一点！ · 开发板配对</title>
+<style>
+*{box-sizing:border-box}body{background:#fff5df;color:#50392a;font:17px/1.6 system-ui;margin:0;padding:8vh 20px}main{max-width:540px;margin:auto}h1{font-size:32px;margin:0}p{margin:12px 0}button{font:inherit;font-weight:700;background:#dce9bc;color:inherit;border:2px solid #684d37;border-radius:12px;padding:9px 18px;cursor:pointer}button:disabled{opacity:.65}#qr svg{width:210px;height:auto;background:white;display:block;margin:16px 0}a{color:#375c45}#status{font-weight:650}
+</style><main><h1>连接小吃摊</h1><p>在 Mac 的 Chrome 中打开。用 USB 数据线接上已烧录的板子，再选择它的串口。</p><button id="connect">选择开发板</button><p id="status" role="status"></p><section id="pair" hidden><p>用 iPhone 相机扫码，在 Safari 打开。这台 Mac 的页面要保持打开。</p><div id="qr"></div><a id="url">打开配对试玩页</a></section></main>
+<script src="vendor/peerjs.min.js"></script><script src="vendor/qrcode.js"></script><script src="board-host.js"></script></html>
