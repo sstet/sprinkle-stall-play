@@ -234,7 +234,7 @@ function tick(raw){
     const elapsed=now-entered;
     const reaction=caught&&(phase==='react'||phase==='result')?{tier:reactionTier(tasteScore),elapsed:elapsed-firstBiteMs}:null;
     const displayedScore=phase==='result'?tasteScore:null;
-    ShopArt.room(table,now,caught,Math.max(0,Math.min(1,(now-entered)/430)),getOrder().dishId,grains,
+    ShopArt.room(table,now,caught||phase==='count',now-deadline,getOrder().dishId,grains,
       phase==='eat',getOrder().id,reaction,displayedScore,Math.min(1,(elapsed-scoreRevealMs)/320),
       !caught&&phase==='result'?Math.min(1,elapsed/620):1);
   }

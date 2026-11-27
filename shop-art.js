@@ -83,7 +83,7 @@ const ShopArt = (() => {
     }c.restore();
   }
 
-  function room(c,t,serving,progress,dish,grains,eating,guestId,reaction,score,rise,missProgress=1){
+  function room(c,t,serving,handoffMs,dish,grains,eating,guestId,reaction,score,rise,missProgress=1){
     const {width:w,height:h}=c.canvas;
     c.clearRect(0,0,w,h);
     const scale=Math.max(w/16,h/9);
@@ -126,8 +126,22 @@ const ShopArt = (() => {
     }
     if(serving){
       const mw=Math.min(gh*.67,w*.40);
-      const dx=(1-progress)*(w*.56+mw);
-      meal(c,dish,center+dx,Math.min(tableY+gh*.04,h-mw*.43-h*.025),mw,grains);
+      // Mirror the 240px LCD: the 180px dish starts at x=30 and travels
+      // 240px with quadratic acceleration over the final 430ms.
+      const edgeX=w+mw/2;
+      let dishX;
+      if(handoffMs<0){
+        const t=Math.max(0,1+handoffMs/430);
+        dishX=edgeX+(30-240*t*t)*mw/180;
+      }else{
+        const seamX=edgeX-210*mw/180;
+        const distance=seamX-center;
+        const exitSpeed=(480/430)*mw/180;
+        const duration=2*distance/exitSpeed;
+        const left=Math.max(0,1-handoffMs/duration);
+        dishX=center+distance*left*left;
+      }
+      meal(c,dish,dishX,Math.min(tableY+gh*.04,h-mw*.43-h*.025),mw,grains);
     }
   }
   let paintedPreview=null;
