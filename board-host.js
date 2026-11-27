@@ -74,7 +74,9 @@ async function readBoard(){
 button.onclick=async()=>{
   button.disabled=true;
   try{
-    port=await navigator.serial.requestPort();await port.open({baudRate:115200});
+    const known=(await navigator.serial.getPorts()).filter(p=>p.getInfo().usbVendorId===0x303a);
+    port=known.length===1?known[0]:await navigator.serial.requestPort();
+    await port.open({baudRate:115200});
     writer=port.writable.getWriter();reader=port.readable.getReader();status('正在识别固件…');
     readBoard().catch(()=>{}).finally(()=>{if(verified)release('串口已断开，插好后重新选择')});
     for(let attempt=0;attempt<12&&!verified;attempt++){await command('HELLO');await new Promise(r=>setTimeout(r,300))}
