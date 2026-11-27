@@ -24,7 +24,7 @@ const stage=$('stage'),phone=$('phone'),board=$('lcd')?.getContext('2d'),table=$
 let index=0,phase='cook',selected=0,handfuls=[],grains=[],land=false,deadline=0,entered=0,pausedAt=null;
 let retried=false,history=[],caught=false,review='',sound=false,audio=null,drag=null,shakeGesture=null,ignoreClickUntil=0;
 let tasteScore=null;
-const firstBiteMs=820,scoreRevealMs=1600;
+const firstBiteMs=1200,scoreRevealMs=1980;
 const tastingSounds=['好香！','嗯～','咦？','唔……'];
 function reactionTier(score){
   if(score===10)return 0;
@@ -216,11 +216,11 @@ function tick(raw){
     phase='react';$('speech').textContent=tastingSounds[reactionTier(tasteScore)];refresh();
   }
   if(phase==='react'&&now-entered>=scoreRevealMs){phase='result';$('speech').textContent=review;tone(870);refresh()}
-  if(board){board.fillStyle='#000';board.fillRect(0,0,160,160)}const moving=phase==='count'?Math.max(0,1-(deadline-now)/430):0;
-  if(board&&['cook','count','slide'].includes(phase)){
+  if(board){board.fillStyle='#000';board.fillRect(0,0,160,160)}const moving=phase==='count'?0:Math.max(0,Math.min(1,(now-deadline)/220));
+  if(board&&(['cook','count','slide'].includes(phase)||(now>=deadline&&now-deadline<220))){
     board.save();const wobble=phase==='count'&&deadline-now<900?Math.round(Math.sin(now/75)*1.6):0;
     const counting=phase==='count';
-    board.translate(Math.round((counting?13:8)-160*moving*moving)+wobble,counting?26:43);
+    board.translate(Math.round((counting?13:8)-160*moving)+wobble,counting?26:43);
     board.scale(counting?1.4:1.5,counting?1.4:1.5);
     ShopArt.counterDish(board,getOrder().dishId);
     for(const g of grains){if(now<g.at)continue;Art.drawGrains(board,[g],Math.min(1,(now-g.at)/430),getOrder().dishId)}
