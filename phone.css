@@ -38,3 +38,11 @@ dialog{z-index:10;max-width:min(360px,90vw);max-height:85dvh;overflow:auto}
 #modebar[data-connected=true]{background:#dfebc9;color:#354d33}
 .orderCard #orderDish{width:46px;height:40px;object-fit:contain;image-rendering:auto}
 @media(max-width:350px){.orderCard{gap:5px}.orderCard #orderDish{width:35px}}
+
+.motion-on[data-phase=count] .actions{display:none}
+@media(orientation:portrait){
+  .motion-on.serving .app{position:absolute;left:50%;top:50dvh;width:100dvh;height:100vw;min-height:0;transform:translate(-50%,-50%) rotate(var(--table-turn,90deg))}
+}
+.serving[data-phase=result] #dining:has(.missed) #speech{animation:miss-look .65s ease-out}
+@keyframes miss-look{25%{translate:-6px 0}65%{translate:4px 0}}
+@media(prefers-reduced-motion:reduce){.serving[data-phase=result] #dining:has(.missed) #speech{animation:none}}

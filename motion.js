@@ -20,7 +20,7 @@
     canShake=true;lastShake=-Infinity;lastMotion=0;gravity=null;
   }
   function stop(message){
-    enabled=false;clearTimeout(probe);resetPose();
+    enabled=false;document.body.classList.remove('motion-on');refresh();clearTimeout(probe);resetPose();
     removeEventListener('deviceorientation',orientation);
     removeEventListener('devicemotion',motion);
     button.textContent='开启体感';button.setAttribute('aria-pressed','false');
@@ -32,6 +32,8 @@
     const now=performance.now(),beta=e.beta*Math.PI/180,gamma=e.gamma*Math.PI/180;
     
     const vertical=Math.sin(beta),faceUp=Math.cos(beta)*Math.cos(gamma);
+    const sideways=Math.cos(beta)*Math.sin(gamma);
+    if(Math.abs(sideways)>.45)document.body.style.setProperty('--table-turn',sideways>0?'-90deg':'90deg');
     pose={vertical,faceUp};
     checkPose(now);
   }
@@ -43,19 +45,23 @@
     if(phase==='cook'){
       if(!handfuls.length)armed=false;
       if(inverted&&handfuls.length)armed=true;
-      if(armed&&vertical>.60){
+      if(handfuls.length&&vertical>.60){
         uprightSince??=now;
-        if(now-uprightSince>=200){armed=false;uprightSince=null;countdown()}
+        if(now-uprightSince>=100){armed=false;uprightSince=null;countdown()}
       }else uprightSince=null;
     }
-    if(phase==='result'&&land&&vertical>.7){
+    if(phase==='result'&&land&&vertical>.7&&(caught||now-entered>1300)){
       liftSince??=now;
       if(now-liftSince>=350){liftSince=null;next()}
     }else liftSince=null;
-    if(['count','slide','miss'].includes(phase)&&!land&&faceUp>.92&&now-lastMotion<400&&force<2){
+    if(phase==='count'&&time()>=deadline)return;
+    if((phase==='count'||(phase==='cook'&&armed))&&faceUp>.86&&force<3){
       flatSince??=now;
-      if(now-flatSince>=230){flatSince=null;place()}
-    }else flatSince=null;
+      if(now-flatSince>=150){
+        if(phase==='cook'){armed=false;countdown()}
+        if(!land)place();
+      }
+    }else{flatSince=null;if(phase==='count'&&land&&faceUp<.77){setLand(false);refresh()}}
   }
   function motion(e){
     if(!enabled||!playing())return;
@@ -89,7 +95,7 @@
       const apis=[window.DeviceOrientationEvent,window.DeviceMotionEvent];
       const grants=await Promise.all(apis.map(api=>api.requestPermission?api.requestPermission():'granted'));
       if(grants.some(state=>state!=='granted')){stop('未获得动作权限，可以继续点按玩。');return}
-      resetPose();seenPose=false;seenMotion=false;enabled=true;
+      resetPose();seenPose=false;seenMotion=false;enabled=true;document.body.classList.add('motion-on');refresh();
       addEventListener('deviceorientation',orientation);addEventListener('devicemotion',motion);
       showMode('体感已授权','正在接收手机动作…');
       button.textContent='关闭体感';button.setAttribute('aria-pressed','true');

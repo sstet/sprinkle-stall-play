@@ -83,7 +83,7 @@ const ShopArt = (() => {
     }c.restore();
   }
 
-  function room(c,t,serving,progress,dish,grains,eating,guestId,reaction,score,rise){
+  function room(c,t,serving,progress,dish,grains,eating,guestId,reaction,score,rise,missProgress=1){
     const {width:w,height:h}=c.canvas;
     c.clearRect(0,0,w,h);
     const scale=Math.max(w/16,h/9);
@@ -120,6 +120,10 @@ const ShopArt = (() => {
       c.translate(-gw/2,-gh);c.scale(gw/46,gh/54);Art.portrait(c,guestId);
     }
     c.restore();
+    if(missProgress<1&&!reducedMotion.matches){
+      const mw=Math.min(gh*.55,w*.28);
+      meal(c,dish,w*(1.03-.33*missProgress),tableY+gh*.08+(h-tableY+mw)*missProgress**2,mw,grains);
+    }
     if(serving){
       const mw=Math.min(gh*.67,w*.40);
       const dx=(1-progress)*(w*.56+mw);

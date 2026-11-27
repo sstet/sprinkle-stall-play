@@ -47,7 +47,7 @@ function initArt(){
   {
     const canvas=table.canvas;
     const resize=()=>{
-      const rect=canvas.getBoundingClientRect();
+      const rect={width:canvas.clientWidth,height:canvas.clientHeight};
       if(!rect.width||!rect.height)return;
       const ratio=Math.min(window.devicePixelRatio||1,2,1600/Math.max(rect.width,rect.height));
       canvas.width=Math.round(rect.width*ratio);canvas.height=Math.round(rect.height*ratio);
@@ -89,7 +89,7 @@ function refresh(){const o=getOrder();drawCustomerIcon(o.id);$('album').hidden=p
     $('countCaption').textContent=phase==='miss'?'菜已滑出':phase==='slide'?'正在出菜':'即将出菜';
     $('menuCode').textContent='菜单 '+String(o.menuId).padStart(3,'0');
   }
-  if(phase==='cook'){setButtons('撒一撮','扶正出菜',!handfuls.length);$('hint').textContent=handfuls.length?'可以继续撒料，也可以扶正出菜。':'点手机换调料，给'+o.dish+'撒'+(['一','两','三'][o.count-1])+'撮'+names[o.id]+'。';$('boardword').textContent=o.short}
+  if(phase==='cook'){setButtons('撒一撮',document.body.classList.contains('motion-on')?'':'扶正出菜',!handfuls.length);$('hint').textContent=handfuls.length?'可以继续撒料，也可以扶正出菜。':'点手机换调料，给'+o.dish+'撒'+(['一','两','三'][o.count-1])+'撮'+names[o.id]+'。';$('boardword').textContent=o.short}
   if(mobile&&phase==='cook'&&!handfuls.length)$('hint').textContent=($('motion').getAttribute('aria-pressed')==='true'?'把手机顶端朝下，轻抖撒料。':'选好调料，点瓶身撒一撮。');
   if(phase==='count'||phase==='slide'){setButtons(land?'餐桌就位':'横放手机','');$('primary').disabled=land;$('hint').textContent=land?'小人拿好筷子了。':'把手机拖向左边松手，或点「横放手机」。'}
   else $('primary').disabled=false;
@@ -112,7 +112,7 @@ function sprinkle(){
   tone(370+80*selected);phone.classList.remove('shake');void phone.offsetWidth;phone.classList.add('shake');refresh()
 }
 function countdown(){if(phase==='cook'&&!handfuls.length)return;phase='count';caught=false;setLand(false);$('speech').textContent='等上菜…';deadline=time()+3000;$('boardword').textContent='3';refresh();tone(520)}
-function place(){if(phase==='miss'){setLand(true);phase='result';$('speech').textContent=review;refresh();return}if(phase!=='count'&&phase!=='slide')return;setLand(true);tone(690);refresh()}
+function place(){if(phase==='miss'){setLand(true);phase='result';$('speech').textContent=review;refresh();return}if(phase!=='count'||time()>=deadline)return;setLand(true);tone(690);refresh()}
 function taste(order, portions){
   const correct=portions.filter(id=>id===order.id).length;
   const extra=portions.length-correct;
@@ -133,11 +133,11 @@ function taste(order, portions){
   return {score,text};
 }
 function finishSlide(now){
-  caught=land;
+  caught=land;$('speech').classList.toggle('missed',!caught);
   const rating=caught?taste(getOrder(),handfuls):null;
   tasteScore=rating?.score??null;
   review=rating?.text??('我的'+(index===0?'面':getOrder().dish)+'呢？');
-  phase=caught?'eat':'miss';entered=now;$('speech').textContent=caught?'啊呜…':review;tone(caught?780:190);refresh()
+  phase=caught?'eat':mobile?'result':'miss';if(mobile&&!caught)setLand(true);entered=now;$('speech').textContent=caught?'啊呜…':review;tone(caught?780:190);refresh()
 }
 function next(){
   if(phase!=='result')return;
@@ -208,14 +208,14 @@ $('walletAction').onclick=leaveWallet;
 function tick(raw){
   const now=time();
   if(phase==='count'){const left=Math.ceil((deadline-now)/1000);
-    if(left<=0){phase='slide';entered=deadline;$('boardword').textContent='';refresh()}
+    if(left<=0){$('boardword').textContent='';finishSlide(deadline)}
     else if($('boardword').textContent!==String(left)){$('boardword').textContent=String(left);tone(left===1?660:550)}}
-  if(phase==='slide'&&now-entered>=630)finishSlide(now);
+
   if(phase==='eat'&&now-entered>=firstBiteMs){
     phase='react';$('speech').textContent=tastingSounds[reactionTier(tasteScore)];refresh();
   }
   if(phase==='react'&&now-entered>=scoreRevealMs){phase='result';$('speech').textContent=review;tone(870);refresh()}
-  if(board){board.fillStyle='#000';board.fillRect(0,0,160,160)}const moving=phase==='slide'?Math.min(1,(now-entered)/630):0;
+  if(board){board.fillStyle='#000';board.fillRect(0,0,160,160)}const moving=phase==='count'?Math.max(0,1-(deadline-now)/430):0;
   if(board&&['cook','count','slide'].includes(phase)){
     board.save();const wobble=phase==='count'&&deadline-now<900?Math.round(Math.sin(now/75)*1.6):0;
     const counting=phase==='count';
@@ -229,11 +229,13 @@ function tick(raw){
   }
   if(mobile&&phase==='cook'&&$('wallet').hidden)ShopArt.orderPreview($('orderDish'),getOrder().dishId,grains,now);
   if(land){
+    if(phase==='count')$('speech').textContent='餐桌就位 · '+Math.max(1,Math.ceil((deadline-now)/1000));
     const elapsed=now-entered;
     const reaction=caught&&(phase==='react'||phase==='result')?{tier:reactionTier(tasteScore),elapsed:elapsed-firstBiteMs}:null;
     const displayedScore=phase==='result'?tasteScore:null;
     ShopArt.room(table,now,caught,Math.max(0,Math.min(1,(now-entered)/430)),getOrder().dishId,grains,
-      phase==='eat',getOrder().id,reaction,displayedScore,Math.min(1,(elapsed-scoreRevealMs)/320));
+      phase==='eat',getOrder().id,reaction,displayedScore,Math.min(1,(elapsed-scoreRevealMs)/320),
+      !caught&&phase==='result'?Math.min(1,elapsed/620):1);
   }
   requestAnimationFrame(tick)
 }
@@ -252,6 +254,7 @@ $('guide').onclose=()=>{const dt=performance.now()-pausedAt;deadline+=dt;entered
 $('sound').onclick=()=>{sound=!sound;if(sound){audio??=new (window.AudioContext||window.webkitAudioContext)();audio.resume();tone(600)}$('sound').textContent='音效 '+(sound?'开':'关');$('sound').setAttribute('aria-pressed',String(sound))};
 document.addEventListener('keydown',e=>{if(e.repeat||e.metaKey||e.ctrlKey||e.altKey||document.querySelector('dialog[open]'))return;
   if(!$('wallet').hidden)return;
+  if(document.body.classList.contains('motion-on')&&['cook','count'].includes(phase)&&['ArrowLeft','Enter'].includes(e.code))return;
   if(e.key==='?'){$('help').click();return}
   if(['1','2','3'].includes(e.key)){choose(Number(e.key)-1);return}
   if(!['Space','Enter','ArrowLeft'].includes(e.code)||mobile&&e.target.closest('button'))return;
