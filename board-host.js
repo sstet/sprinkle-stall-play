@@ -26,7 +26,13 @@ async function snapshots(){
   }catch{status('USB 写入中断，请重新连接')}finally{busy=false}
 }
 function pairing(){
-  const id='stall-'+crypto.randomUUID().replaceAll('-','');
+  // Keep the receiver address in this tab's URL so refreshing or reopening it
+  // preserves the QR link that the phone already scanned.
+  const address=new URL(location.href);
+  const saved=new URLSearchParams(address.hash.slice(1)).get('station');
+  const id=/^stall-[0-9a-f]{32}$/.test(saved||'')?saved:'stall-'+crypto.randomUUID().replaceAll('-','');
+  address.hash='station='+id;
+  history.replaceState(null,'',address);
   peer=new Peer(id);
   peer.on('open',()=>{
     const link=new URL('index.html',location.href);
